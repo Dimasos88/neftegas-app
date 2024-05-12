@@ -89,18 +89,15 @@ def split_array(array, num):
 
 def calcZ():
     # Исходные данные
-    xj = [
-        float(C1.get()), float(C2.get()), float(C3.get()),
-        float(NC4.get()), float(NC5.get()), float(C6.get()),
-        float(N2.get()), float(C02.get()), float(H2S.get())
-    ]
-    xk = xj
-
     R = 8.314
 
     Tпл = float(PT.get())
 
-    Pпл = float(PP.get())
+    Pпл =  float(PP.get())
+
+    # print(sum(xj))
+
+    xk = [0.88, 0.06, 0.01, 0.01, 0.008, 0.018, 0.01, 0.001, 0.003]
 
     Tcj = [190.45, 305.32, 369.83, 425.12, 469.7, 512.8, 126.2, 304.19, 373.53]
 
@@ -113,62 +110,41 @@ def calcZ():
 
     w = [0.012, 0.1, 0.152, 0.2, 0.252, 0.25, 0.0377, 0.228, 0.0942]
 
-    # ------------------------------------------------------------------------------------
+    delta_test = []
 
-    # Расчёт aj для П-Р
-    aj1 = []
-    for j in range(9):
-        aj1.append(0.45724 * (R ** 2) * (Tcj[j] ** 2) / Pcj[j])
-
-    # ------------------------------------------------------------------------------------
-    # Расчёт aj для СРК
-    aj2 = []
-    for j in range(9):
-        aj2.append(0.42748 * (R ** 2) * (Tcj[j] ** 2) / Pcj[j])
+    delta = []
 
     # ------------------------------------------------------------------------------------
 
-    # Расчёт bj ДЛЯ П-Р
-    bj1 = []
+    # Расчёт aj
+    aj = []
     for j in range(9):
-        bj1.append(0.0778 * (R) * (Tcj[j]) / Pcj[j])
-
-    # ------------------------------------------------------------------------------------
-    # Расчёт bj ДЛЯ СРК
-    bj2 = []
-    for j in range(9):
-        bj2.append(0.08664 * (R) * (Tcj[j]) / Pcj[j])
+        aj.append(0.45724 * (R ** 2) * (Tcj[j] ** 2) / Pcj[j])
 
     # ------------------------------------------------------------------------------------
 
-    # Расчёт kj ДЛЯ П-Р
-    kj1 = []
+    # Расчёт bj
+    bj = []
     for j in range(9):
-        kj1.append(0.37464 + 1.54226 * w[j] - 0.26992 * (w[j] ** 2))
-
-    # ------------------------------------------------------------------------------------
-    # Расчёт kj ДЛЯ СРК
-    kj2 = []
-    for j in range(9):
-        kj2.append(0.48 + 1.574 * w[j] - 0.176 * (w[j] ** 2))
+        bj.append(0.0778 * (R) * (Tcj[j]) / Pcj[j])
 
     # ------------------------------------------------------------------------------------
 
-    # Расчёт alpha_j ДЛЯ П-Р
-    alpha_j1 = []
+    # Расчёт kj
+    kj = []
     for j in range(9):
-        alpha_j1.append(aj1[j] * ((1 + kj1[j] * (1 - ((Tпл / Tcj[j]) ** 0.5))) ** 2))
-
-    alpha_k1 = alpha_j1
+        kj.append(0.37464 + 1.54226 * w[j] - 0.26992 * (w[j] ** 2))
 
     # ------------------------------------------------------------------------------------
 
-    # Расчёт alpha_j ДЛЯ СРК
-    alpha_j2 = []
+    # Расчёт alpha_j
+    alpha_j = []
     for j in range(9):
-        alpha_j2.append(aj2[j] * ((1 + kj2[j] * (1 - ((Tпл / Tcj[j]) ** 0.5))) ** 2))
+        alpha_j.append(aj[j] * ((1 + kj[j] * (1 - ((Tпл / Tcj[j]) ** 0.5))) ** 2))
 
-    alpha_k2 = alpha_j2
+    alpha_k = alpha_j
+
+    print("alpha_j = ", alpha_j)
 
     # ------------------------------------------------------------------------------------
 
@@ -195,19 +171,8 @@ def calcZ():
     delta.append(np.array([0.07, 0.085, 0.08, 0.075, 0.07, 0.07, 0.13, 0.135, 0]))
     # ------------------------------------------------------------------------------------
 
-    # Расчёт alpha_jk для П-Р
-    alpha_jk1 = []
-
-    for j in range(9):
-        for k in range(9):
-            alpha_jk1.append(((alpha_j1[j] * alpha_k1[k]) ** 0.5) * (1 - delta[j][k]))
-
-    alpha_jk1 = split_array(alpha_jk1, 9)
-
-    # ------------------------------------------------------------------------------------
-
-    # Расчёт alpha_jk для СРК
-    alpha_jk2 = []
+    # Расчёт alpha_jk
+    alpha_jk = []
 
     for j in range(9):
         for k in range(9):
@@ -220,71 +185,64 @@ def calcZ():
     # Расчёт alpha_m и betta_m для П-Р
     xjxk = (np.outer(xj, xk))
 
-    alpha_m1 = np.sum(np.dot(xjxk, alpha_jk1))
+    alpha_m = np.sum(np.dot(xjxk, alpha_jk))
 
-    betta_m1 = np.sum(np.dot(xj, bj1))
+    print('alpha_m = ', alpha_m)
 
-    # ------------------------------------------------------------------------------------
-    # Расчёт alpha_m и betta_m для СРК
-    alpha_m2 = np.sum(np.dot(xjxk, alpha_jk2))
+    betta_m = np.sum(np.dot(xj, bj))
 
-    betta_m2 = np.sum(np.dot(xj, bj2))
-
+    print('betta_m = ', betta_m)
     # ------------------------------------------------------------------------------------
 
-    # Расчёт A и B для П-Р
-    A1 = (alpha_m1 * Pпл) / ((R ** 2) * (Tпл ** 2))
+    # Расчёт A и B
+    A = (alpha_m * Pпл) / ((R ** 2) * (Tпл ** 2))
 
-    B1 = (betta_m1 * Pпл) / ((R) * (Tпл))
+    B = (betta_m * Pпл) / ((R) * (Tпл))
 
+    print(A)
+
+    print(B)
     # ------------------------------------------------------------------------------------
+    # Расчёт z
+    coeff = [1, -(1 - B), (A - 2 * B - 3 * (B ** 2)), -(A * B - ((B ** 2) - (B ** 3)))]
 
-    # Расчёт A и B для СРК
-    A2 = (alpha_m2 * Pпл) / ((R ** 2) * (Tпл ** 2))
+    z = max(np.roots(coeff))
 
-    B2 = (betta_m2 * Pпл) / ((R) * (Tпл))
+    print("z = ", z)
 
-    # ------------------------------------------------------------------------------------
 
-    # Расчёт z для П-Р
-    coeff1 = [1, -(1 - B1), (A1 - 2 * B1 - 3 * (B1 ** 2)), -(A1 * B1 - ((B1 ** 2) - (B1 ** 3)))]
-    global z1
-    z1.set(max(np.roots(coeff1)))
-
-    PPR.insert(0, z1)
-
-    print("z ПО П-Р = ", z1)
-    # ------------------------------------------------------------------------------------
-
-    # Расчёт z для П-Р
-    coeff2 = [1, -(1), (A2 - 1 * B2 - 1 * (B2 ** 2)), -(A2 * B2)]
-    global z2
-    z2.set(max(np.roots(coeff2)))
-
-    print("z ПО СРК = ", z2)
-
-    SRK.insert(0,z2)
-
-    # Расчёт z для Гуревичу-Платонову
-    m = [16.043, 30.07, 44.097, 58.123, 72.15, 84, 28.013, 44.01, 34.082]
-
-    Mj = []
-
-    for j in range(9):
-        Mj.append(m[j] * xj[j])
-
-    M = np.sum(Mj)
-    print("M =", M)
-
-    Pс = (0.006894 * (709.604 - (M / 28.96) * 58.718))
-
-    Tс = ((170.491 + (M / 28.96) * 307.44) / 1.8)
-
-    global z3
-    z3.set((0.4 * math.log((Tпл / Tс)) + 0.73) ** (Pпл / Pс) + 0.1 * (Pпл / Pс))
-
-    print("z3 = ", z3)
-
-    PGP.insert(0, z3)
+#
+# tk.Label(root, text="Компонент").grid(row=1, column=0)
+# tk.Label(root, text="Мольная дОЛЯ").grid(row=1, column=1)
+# tk.Label(root, text="Z =").grid(row=1, column=2)
+#
+# tk.Label(root, text="NC4").grid(row=2, column=0)
+# tk.Label(root, text="0.111").grid(row=2, column=1)
+# tk.Label(root, text="0.111").grid(row=2, column=2)
+#
+# tk.Label(root, text="NC5").grid(row=3, column=0)
+# tk.Label(root, text="0.111").grid(row=3, column=1)
+# tk.Label(root, text="0.111").grid(row=3, column=2)
+#
+# tk.Label(root, text="сб").grid(row=4, column=0)
+# tk.Label(root, text="0.111").grid(row=4, column=1)
+# tk.Label(root, text="0.111").grid(row=4, column=2)
+#
+# tk.Label(root, text="N2").grid(row=5, column=0)
+# tk.Label(root, text="0.111").grid(row=5, column=1)
+# tk.Label(root, text="0.111").grid(row=5, column=2)
+#
+# tk.Label(root, text="CO2").grid(row=6, column=0)
+# tk.Label(root, text="0.111").grid(row=6, column=1)
+# tk.Label(root, text="0.111").grid(row=6, column=2)
+#
+# tk.Label(root, text="H2S").grid(row=7, column=0)
+# tk.Label(root, text="0.111").grid(row=7, column=1)
+# tk.Label(root, text="0.111").grid(row=7, column=2)
+#
+# tk.Label(root, text="Пластовое давление, мПа").grid(row=8, column=0)
+# tk.Label(root, text="Пластовая температура, К").grid(row=8, column=1)
+#
+# tk.Button(root, text="Расчитать", command=calculate).grid(row=9, column=0, columnspan=3)
 
 root.mainloop()
