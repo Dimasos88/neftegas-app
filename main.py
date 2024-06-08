@@ -107,6 +107,7 @@ PPR.grid(row=5, column=9, columnspan=2)
 tk.Label(root, text="По Гуревичу-Платонову:").grid(row=10, column=7, columnspan=2)
 z3 = tk.StringVar()
 z3.set('')
+
 PGP = tk.Entry(root, textvariable=z3, state='readonly')
 PGP.grid(row=10, column=9, columnspan=2)
 
@@ -179,6 +180,7 @@ def calcZ():
         bj1.append(0.0778 * (R) * (Tcj[j]) / Pcj[j])
 
     # ------------------------------------------------------------------------------------
+
     # Расчёт bj ДЛЯ СРК
     bj2 = []
     for j in range(9):
@@ -192,6 +194,7 @@ def calcZ():
         kj1.append(0.37464 + 1.54226 * w[j] - 0.26992 * (w[j] ** 2))
 
     # ------------------------------------------------------------------------------------
+
     # Расчёт kj ДЛЯ СРК
     kj2 = []
     for j in range(9):
@@ -270,6 +273,7 @@ def calcZ():
     betta_m1 = np.sum(np.dot(xj, bj1))
 
     # ------------------------------------------------------------------------------------
+    
     # Расчёт alpha_m и betta_m для СРК
     alpha_m2 = np.sum(np.array(xjxk) * np.array(alpha_jk2))
 
@@ -328,22 +332,26 @@ def calcZ():
 
     #Pс = (0.006894 * (709.604 - (M / 28.96) * 58.718))
     global Pc
-    Pc.set(np.sum(np.array(xj) * np.array(Pcj))/1000000)
+    Pcc = np.sum(np.array(xj) * np.array(Pcj))
+    Pc.set( np.sum(np.array(xj) * np.array(Pcj))/1000000) 
     PC.insert(0, Pc)
 
+    
+
     global Tc
+    Tcc = np.sum(np.array(xj) * np.array(Tcj))
     Tc.set(np.sum(np.array(xj) * np.array(Tcj)))
     TC.insert(0, Tc)
-
     #Tс = ((170.491 + (M / 28.96) * 307.44) / 1.8)
-    Pc = np.sum(np.array(xj) * np.array(Pcj))
-    Tc = np.sum(np.array(xj) * np.array(Tcj))
+    
+    
     global z3
 
-    z3.set((0.4 * np.emath.log10((Tпл / Tc)) + 0.73) ** (Pпл / Pc) + 0.1 * (Pпл / Pc))
+    z3.set((0.4 * np.emath.log10((Tпл / Tcc)) + 0.73) ** (Pпл / Pcc) + 0.1 * (Pпл / Pcc))
 
     print("z3 = ", z3)
 
     PGP.insert(0, z3)
+    
 
 root.mainloop()
